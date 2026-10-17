@@ -1,0 +1,14 @@
+[
+    {
+        "employee_id": "1",
+        "name": "John Doe",
+        "position": "Software Engineer",
+        "department": "Engineering"
+    },
+    {
+        "employee_id": "2",
+        "name": "Umar Shariff",
+        "position": "Software QA",
+        "department": "IT"
+    }
+]

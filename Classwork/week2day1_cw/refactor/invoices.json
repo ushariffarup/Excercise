@@ -1,0 +1,26 @@
+[
+    {
+        "invoice_id": 1,
+        "vendor": "ABC Corp",
+        "amount": 1200,
+        "status": "pending"
+    },
+    {
+        "invoice_id": 3,
+        "vendor": "LMN Inc",
+        "amount": 2000,
+        "status": "pending"
+    },
+    {
+        "invoice_id": 4,
+        "vendor": "OPQ Enterprises",
+        "amount": 2500,
+        "status": "paid"
+    },
+    {
+        "invoice_id": 5,
+        "vendor": "XYZ 5Ltd2",
+        "amount": 150025.0,
+        "status": "paid5"
+    }
+]

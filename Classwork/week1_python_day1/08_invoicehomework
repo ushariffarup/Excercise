@@ -1,0 +1,33 @@
+
+invoice_amount = 5000
+invoice_approver = ['Manager', 'Supervisor', 'Director']
+
+match invoice_amount:
+    case amount if amount <= 1000:
+        approver = invoice_approver[0]
+    case amount if amount <= 3000:
+        approver = invoice_approver[1]
+    case amount if amount > 3000:
+        approver = invoice_approver[2]
+    case _:
+        approver = None
+
+print(f"Invoice amount: {invoice_amount}, Approver: {approver}")
+
+if invoice_amount > 5000:
+    print("Invoice amount exceeds the maximum limit for approval.")
+    approver = 'Director'
+    print(f"Invoice amount: {invoice_amount}, Approver: {approver}")
+elif invoice_amount > 3000:
+    print("Invoice amount exceeds the limit for Supervisor approval.")
+    approver = 'supervisor'
+    print(f"Invoice amount: {invoice_amount}, Approver: {approver}")
+elif invoice_amount > 1000:
+    print("Invoice amount exceeds the limit for Manager approval.")
+    approver = 'Manager'
+    print(f"Invoice amount: {invoice_amount}, Approver: {approver}")
+else:
+    print("Invoice amount is within the limit for initial approval.")
+    approver = 'None'
+    print(f"Invoice amount: {invoice_amount}, Approver: {approver}")
+    

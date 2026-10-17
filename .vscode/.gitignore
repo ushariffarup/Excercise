@@ -1,0 +1,4 @@
+# Ignore specific folders
+unwanted-folder-1/
+unwanted-folder-2/
+temp-data/
