@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encounter Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 24px;
+        }
+        main {
+            max-width: 600px;
+            padding: 24px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        dt {
+            font-weight: bold;
+            margin-top: 16px;
+        }
+        dd {
+            margin: 6px 0 0;
+            overflow-wrap: anywhere;
+        }
+        #status {
+            box-sizing: border-box;
+            margin-top: 6px;
+            padding: 8px;
+            width: 100%;
+        }
+        #update-status {
+            margin-top: 8px;
+        }
+        #error {
+            color: #a12622;
+        }
+        #save-message {
+            min-height: 1.2em;
+        }
+        #updated-values {
+            margin-top: 28px;
+            overflow-x: auto;
+        }
+        #updated-values table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #updated-values th,
+        #updated-values td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Encounter Details</h1>
+        <p id="loading" role="status">Loading encounter details...</p>
+        <p id="error" role="alert"></p>
+        <dl id="details" hidden>
+            <dt>Encounter ID</dt>
+            <dd id="encounter-id"></dd>
+            <dt>Patient Number</dt>
+            <dd id="patient-number"></dd>
+            <dt>Status</dt>
+            <dd>
+                <select id="status" aria-label="Intervention status" disabled>
+                    <option value="PENDING_REVIEW">PENDING_REVIEW</option>
+                    <option value="ASSIGNED">ASSIGNED</option>
+                    <option value="CONTACTED">CONTACTED</option>
+                    <option value="FOLLOW_UP_SCHEDULED">FOLLOW_UP_SCHEDULED</option>
+                    <option value="CLOSED">CLOSED</option>
+                </select>
+            </dd>
+            <dt>Assigned To</dt>
+            <dd id="assigned-to"></dd>
+            <dt>Notes</dt>
+            <dd id="notes"></dd>
+            <dd>
+                <button id="update-status" type="button" disabled>Update</button>
+                <span id="save-message" role="status"></span>
+            </dd>
+        </dl>
+        <section id="updated-values" hidden>
+            <h2>Saved Intervention</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Encounter ID</th>
+                        <th>Patient Number</th>
+                        <th>Status</th>
+                        <th>Assigned To</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="updated-values-row"></tbody>
+            </table>
+        </section>
+    </main>
+    <script>
+        const API_BASE_URL = "http://127.0.0.1:8001";
+
+        async function loadEncounterDetails() {
+            const encounterId = new URLSearchParams(window.location.search).get("encounter_id");
+            const loading = document.getElementById("loading");
+            const errorElement = document.getElementById("error");
+
+            if (!encounterId || !/^\d+$/.test(encounterId)) {
+                loading.hidden = true;
+                errorElement.textContent = "A valid encounter_id is required in the page URL.";
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/encounters/${encodeURIComponent(encounterId)}`
+                );
+                const result = await response.json();
+                if (!response.ok) {
+                    const detail = typeof result.detail === "string"
+                        ? result.detail
+                        : JSON.stringify(result.detail);
+                    throw new Error(detail || `HTTP error: ${response.status}`);
+                }
+
+                document.getElementById("encounter-id").textContent = result.encounter_id ?? "Not available";
+                document.getElementById("patient-number").textContent = result.patient_nbr ?? "Not available";
+                const statusSelect = document.getElementById("status");
+                const updateButton = document.getElementById("update-status");
+                if (result.intervention_id != null && result.intervention_status != null) {
+                    statusSelect.value = result.intervention_status;
+                    statusSelect.disabled = false;
+                    updateButton.disabled = false;
+                } else {
+                    statusSelect.disabled = true;
+                    updateButton.disabled = true;
+                    document.getElementById("save-message").textContent = "No care intervention for this encounter.";
+                }
+                document.getElementById("assigned-to").textContent = result.assigned_to ?? "Unassigned";
+                document.getElementById("notes").textContent = result.intervention_notes ?? "No notes";
+                document.getElementById("details").hidden = false;
+            } catch (error) {
+                console.error("Error loading encounter details:", error);
+                errorElement.textContent = `Could not load encounter details: ${error.message}`;
+            } finally {
+                loading.hidden = true;
+            }
+        }
+
+        async function saveInterventionStatus() {
+            const encounterId = new URLSearchParams(window.location.search).get("encounter_id");
+            const statusSelect = document.getElementById("status");
+            const updateButton = document.getElementById("update-status");
+            const saveMessage = document.getElementById("save-message");
+
+            updateButton.disabled = true;
+            saveMessage.textContent = "Saving...";
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/interventions/${encodeURIComponent(encounterId)}`,
+                    {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ status: statusSelect.value }),
+                    }
+                );
+                const result = await response.json();
+                if (!response.ok) {
+                    const detail = typeof result.detail === "string"
+                        ? result.detail
+                        : JSON.stringify(result.detail);
+                    throw new Error(detail || `HTTP error: ${response.status}`);
+                }
+                const values = [
+                    result.encounter_id,
+                    document.getElementById("patient-number").textContent,
+                    result.status,
+                    result.assigned_to ?? "Unassigned",
+                    result.notes ?? "No notes",
+                ];
+                const row = document.createElement("tr");
+                for (const value of values) {
+                    const cell = document.createElement("td");
+                    cell.textContent = String(value ?? "");
+                    row.appendChild(cell);
+                }
+                document.getElementById("updated-values-row").replaceChildren(row);
+                document.getElementById("updated-values").hidden = false;
+                saveMessage.textContent = "Status updated.";
+            } catch (error) {
+                console.error("Error saving intervention status:", error);
+                saveMessage.textContent = `Could not save status: ${error.message}`;
+            } finally {
+                updateButton.disabled = false;
+            }
+        }
+
+        document.getElementById("update-status").addEventListener("click", saveInterventionStatus);
+        loadEncounterDetails();
+    </script>
+</body>
+</html>

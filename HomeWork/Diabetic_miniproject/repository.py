@@ -72,6 +72,18 @@ def get_encounters(limit, offset):
 	)
 
 
+def get_encounter(encounter_id):
+	return fetch_one(
+		"""
+		SELECT encounter_id, patient_nbr, age, time_in_hospital,
+		       risk_score, risk_level, readmitted
+		FROM patient_encounters
+		WHERE encounter_id = %s
+		""",
+		(encounter_id,),
+	)
+
+
 def get_care_queue(risk_level, status, limit, offset):
 	return fetch_all(
 		"""

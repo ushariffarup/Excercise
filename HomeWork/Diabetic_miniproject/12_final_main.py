@@ -21,6 +21,17 @@ def list_encounters(
 	return repository.get_encounters(limit, offset)
 
 
+@app.get("/encounters/{encounter_id}")
+def get_encounter(encounter_id: int):
+	encounter = repository.get_encounter(encounter_id)
+	if encounter is None:
+		raise HTTPException(
+			status_code=404,
+			detail=f"Encounter {encounter_id} not found",
+		)
+	return encounter
+
+
 @app.get("/care-queue")
 def care_queue(
 	risk_level: str | None = None,

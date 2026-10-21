@@ -3,6 +3,9 @@
     "python.analysis.extraPaths": [
         "${workspaceFolder}/.venv/Lib/site-packages"
     ],
+    "terminal.integrated.env.windows": {
+        "NODE_USE_SYSTEM_CA": "1"
+    },
     "python-envs.pythonProjects": [
         {
             "path": "homework",

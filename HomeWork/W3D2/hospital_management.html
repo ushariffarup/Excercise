@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Diabetes Patient Management</title>  
+        <style>
+            section {
+                margin-bottom: 20px;
+                
+            }
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                padding: 20px;
+                border: 1px solid #ddd;
+            }
+            h1 {
+                color: #2b9a77;
+            }
+            form {
+                margin-bottom: 20px;
+                background-color: #f9f9f9;
+                padding: 20px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            label {
+                display: block;
+                margin-top: 10px;
+            }
+            input, select {
+                box-sizing: border-box;
+                display: block;
+                margin-top: 10px;
+                padding: 8px;
+                width: 300px;
+                max-width: 100%;
+            }
+            button {
+                margin-top: 10px;
+                padding: 8px 14px;
+                background-color: #2b9a77;
+                color: white;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+        </style> 
+    </head>
+
+    <body>
+        <h1>Diabetes Patient Management</h1>
+        <div>
+            <h2>Search Patients</h2>
+        </div>
+        <section id="patient-search-form-section">
+            <form id="patient-search-form">  
+                
+                <div class="field">
+                <div><label for="patient-id">Patient ID:</label></div>
+                <div><input type="number" id="patient-id" name="patient-id" min="1"></div>
+                </div>
+                <div><label for="risk_level">Risk Level:</label></div>
+                <select id="risk_level" name="risk_level">
+                    <option value="">Select Risk Level</option>
+                    <option value="LOW">LOW</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="HIGH">HIGH</option>                    
+                </select>
+                </div>
+                <div class="field">
+                <div><label for="risk-score">Risk Score:</label></div>
+                <div><input type="number" id="risk-score" name="risk-score" min="0" max="8"></div>
+                </div>
+                <div><button type="submit" id="search-btn">Search Encounters</button></div>
+            </form>
+
+        </section>
+        <section id="patient-encounter-list">
+            <table id="encounter-table">
+                <thead>
+                    <tr>
+                        <th>Encounter ID</th>
+                        <th>Patient Number</th>
+                        <th>Risk Level</th>
+                        <th>Risk Score</th>
+                        
+                    </tr>
+                </thead>
+                <tbody id="encounter-list">
+
+                    <!-- Patient encounters will be added here -->
+                </tbody>
+
+        </section>
+        <script>
+            const API_BASE_URL = "http://127.0.0.1:8001";
+
+            function renderEncounters(patients, emptyMessage = "No encounters found.") {
+                const rows = patients.map(patient => `
+                    <tr>
+                        <td>
+                            <a href="encounter_details.html?encounter_id=${encodeURIComponent(patient.encounter_id)}"
+                                target="_blank" rel="noopener noreferrer">
+                                ${patient.encounter_id}
+                            </a>
+                        </td>
+                        <td>${patient.patient_nbr}</td>
+                        <td>${patient.risk_level}</td>
+                        <td>${patient.risk_score}</td>
+                    </tr>
+                `).join("");
+                document.getElementById("encounter-list").innerHTML = rows || `
+                    <tr><td colspan="4">${emptyMessage}</td></tr>
+                `;
+            }
+
+            async function searchEncounters(event) {
+                event.preventDefault();
+                const patientId = document.getElementById("patient-id").value.trim();
+                const riskLevel = document.getElementById("risk_level").value;
+                const riskScore = document.getElementById("risk-score").value.trim();
+                const params = new URLSearchParams();
+
+                if (patientId) params.set("patient_id", patientId);
+                if (riskLevel) params.set("risk_level", riskLevel);
+                if (riskScore) params.set("risk_score", riskScore);
+                params.set("match", "AND");
+
+                if (!params.size) {
+                    renderEncounters([], "Enter at least one search filter.");
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/patients/search?${params}`);
+                    const result = await response.json();
+                    if (!response.ok) {
+                        const detail = typeof result.detail === "string"
+                            ? result.detail
+                            : JSON.stringify(result.detail);
+                        throw new Error(detail || `HTTP error! status: ${response.status}`);
+                    }
+                    renderEncounters(result);
+                } catch (error) {
+                    console.error("Error searching encounters:", error);
+                    renderEncounters([], `Search failed: ${error.message}`);
+                }
+            }
+
+            document.getElementById("patient-search-form").addEventListener("submit", searchEncounters);
+        </script>
+    </body>
+         
+</html>
