@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Diabetes Patient Management - Care Intervention Queue & Readmission Risk Platform">
+    <title>Diabetes Patient Management | Clinical Care Intervention</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --bg-page: #f8fafc;
+            --bg-surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+            
+            /* Risk Colors */
+            --risk-high-bg: #fef2f2;
+            --risk-high-text: #b91c1c;
+            --risk-high-border: #fecaca;
+            --risk-med-bg: #fffbeb;
+            --risk-med-text: #b45309;
+            --risk-med-border: #fde68a;
+            --risk-low-bg: #ecfdf5;
+            --risk-low-text: #047857;
+            --risk-low-border: #a7f3d0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* App Header */
+        .app-header {
+            background-color: #0f172a;
+            color: #ffffff;
+            border-bottom: 1px solid #1e293b;
+            padding: 14px 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.4);
+        }
+
+        .brand-icon svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .brand-title {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+        }
+
+        .brand-subtitle {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Health Pill */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .status-pill:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #94a3b8;
+        }
+
+        .status-dot.online {
+            background-color: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+        }
+
+        .status-dot.offline {
+            background-color: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+        }
+
+        .header-link-btn {
+            font-size: 13px;
+            font-weight: 500;
+            color: #93c5fd;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(147, 197, 253, 0.3);
+            transition: all 0.2s;
+        }
+
+        .header-link-btn:hover {
+            background: rgba(147, 197, 253, 0.15);
+            color: #ffffff;
+        }
+
+        /* Tabs Navigation Bar */
+        .nav-tabs-bar {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tabs-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            padding: 0 24px;
+            gap: 8px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: transparent;
+        }
+
+        .tab-badge {
+            background: #e2e8f0;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 9999px;
+        }
+
+        .tab-btn.active .tab-badge {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1280px;
+            margin: 28px auto;
+            padding: 0 24px;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Alerts & Banners */
+        .alert-banner {
+            display: none;
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            margin-bottom: 24px;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: var(--shadow-sm);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .alert-banner.show {
+            display: block;
+        }
+
+        .alert-banner.success {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-banner.error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-banner.info {
+            background-color: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* Card Panels */
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .content-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            margin-bottom: 28px;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Forms Grid */
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.col-span-full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        label .label-hint {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-main);
+            background-color: #ffffff;
+            transition: all 0.2s;
+        }
+
+        select {
+            width: 100%;
+            max-width: 100%;
+            padding: 10px 36px 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-main);
+            background-color: #ffffff;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        select option {
+            padding: 8px 12px;
+            font-size: 14px;
+            color: var(--text-main);
+            background: #ffffff;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            text-decoration: none;
+            line-height: 1;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-secondary {
+            background-color: #ffffff;
+            color: #334155;
+            border-color: var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none !important;
+        }
+
+        .form-actions {
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Filter Chips */
+        .chips-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .chip-btn {
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 9999px;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .chip-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .chip-btn.active {
+            background: #1e293b;
+            color: #ffffff;
+            border-color: #1e293b;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 9px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .badge-risk-HIGH {
+            background-color: var(--risk-high-bg);
+            color: var(--risk-high-text);
+            border: 1px solid var(--risk-high-border);
+        }
+
+        .badge-risk-MEDIUM {
+            background-color: var(--risk-med-bg);
+            color: var(--risk-med-text);
+            border: 1px solid var(--risk-med-border);
+        }
+
+        .badge-risk-LOW {
+            background-color: var(--risk-low-bg);
+            color: var(--risk-low-text);
+            border: 1px solid var(--risk-low-border);
+        }
+
+        .badge-status {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-status-PENDING_REVIEW { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .badge-status-ASSIGNED { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .badge-status-CONTACTED { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+        .badge-status-FOLLOW_UP_SCHEDULED { background: #fae8ff; color: #86198f; border: 1px solid #f5d0fe; }
+        .badge-status-CLOSED { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .badge-status-NONE { background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; font-weight: normal; }
+
+        /* Clickable Encounter ID Link */
+        .encounter-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            transition: all 0.2s ease;
+        }
+
+        .encounter-link:hover {
+            background-color: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        .encounter-link .edit-icon {
+            font-size: 11px;
+            opacity: 0.85;
+        }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        thead {
+            background-color: #f8fafc;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        th {
+            padding: 12px 14px;
+            font-weight: 700;
+            color: #475569;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Action Column & Button in Table */
+        .table-action-cell {
+            text-align: center;
+            white-space: nowrap;
+            width: 100px;
+        }
+
+        .table-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .table-action-btn:hover {
+            background-color: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .table-action-btn svg {
+            width: 13px;
+            height: 13px;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            fill: none;
+        }
+
+        /* Summary / Patient Detail Cards */
+        .detail-summary-box {
+            background: linear-gradient(to right, #f8fafc, #f1f5f9);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .summary-metric {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .summary-metric-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+        }
+
+        .summary-metric-val {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        /* Empty / Loading States */
+        .state-empty,
+        .state-loading {
+            padding: 48px 24px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .state-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(37, 99, 235, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Footer */
+        .app-footer {
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            background-color: #ffffff;
+            padding: 16px 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; align-items: flex-start; }
+            .header-actions { width: 100%; justify-content: space-between; }
+            .form-grid-3 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Application Banner & Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="header-brand">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Diabetes Patient Management</h1>
+                    <p class="brand-subtitle">Clinical Care Intervention Queue &amp; Readmission Risk Analysis</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <!-- Health Status Pill -->
+                <div class="status-pill" id="healthPill" onclick="checkHealth()" title="Click to test backend connection">
+                    <span class="status-dot" id="healthDot"></span>
+                    <span id="healthText">Checking API...</span>
+                </div>
+
+                <a id="apiDocsLink" href="/docs" target="_blank" class="header-link-btn" title="Open FastAPI Interactive Docs">
+                    Swagger API &nearr;
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs-bar">
+        <div class="tabs-container">
+            <button class="tab-btn active" id="tabBtnAdd" onclick="switchTab('add')">
+                <span>➕ Add Patient Encounter</span>
+            </button>
+            <button class="tab-btn" id="tabBtnSearch" onclick="switchTab('search')">
+                <span>🔍 Patient Search &amp; Review Queue</span>
+                <span class="tab-badge" id="searchCountBadge">0</span>
+            </button>
+            <button class="tab-btn" id="tabBtnIntervention" onclick="switchTab('intervention')">
+                <span>📋 Care Intervention &amp; Tracking</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Global Alert / Feedback Banner -->
+    <main class="main-container">
+        <div id="globalAlert" class="alert-banner"></div>
+
+        <!-- ================================================================= -->
+        <!-- TAB 1: ADD PATIENT ENCOUNTER FORM                                 -->
+        <!-- ================================================================= -->
+        <section id="panelAdd" class="tab-panel active">
+            <div class="content-card" style="max-width: 760px; margin: 0 auto;">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Add Patient Encounter</h2>
+                        <p class="card-subtitle">Register a new patient hospital stay to score readmission risk and queue interventions</p>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <form id="addEncounterForm" onsubmit="addPatient(event)" novalidate>
+                        <div class="form-grid-3">
+                            
+                            <!-- Patient Number -->
+                            <div class="form-group">
+                                <label for="add_patient_nbr">
+                                    Patient Number <span style="color:#ef4444">*</span>
+                                    <span class="label-hint">e.g. 115196778</span>
+                                </label>
+                                <input type="number" id="add_patient_nbr" required min="1" placeholder="Enter patient number">
+                            </div>
+
+                            <!-- Age Group -->
+                            <div class="form-group">
+                                <label for="add_age">
+                                    Age Group <span style="color:#ef4444">*</span>
+                                </label>
+                                <select id="add_age" required>
+                                    <option value="" disabled selected>Select age group</option>
+                                    <option value="[0-10)">[0-10)</option>
+                                    <option value="[10-20)">[10-20)</option>
+                                    <option value="[20-30)">[20-30)</option>
+                                    <option value="[30-40)">[30-40)</option>
+                                    <option value="[40-50)">[40-50)</option>
+                                    <option value="[50-60)">[50-60)</option>
+                                    <option value="[60-70)">[60-70)</option>
+                                    <option value="[70-80)">[70-80)</option>
+                                    <option value="[80-90)">[80-90)</option>
+                                    <option value="[90-100)">[90-100)</option>
+                                </select>
+                            </div>
+
+                            <!-- Time in Hospital -->
+                            <div class="form-group">
+                                <label for="add_time_in_hospital">
+                                    Time in Hospital (days) <span style="color:#ef4444">*</span>
+                                    <span class="label-hint">&ge;7 days = +1 pt</span>
+                                </label>
+                                <input type="number" id="add_time_in_hospital" required min="0" placeholder="e.g. 4">
+                            </div>
+
+                            <!-- Inpatient Visits -->
+                            <div class="form-group">
+                                <label for="add_number_inpatient">
+                                    Prior Inpatient Visits <span style="color:#ef4444">*</span>
+                                    <span class="label-hint">&ge;3 visits = +3 pts</span>
+                                </label>
+                                <input type="number" id="add_number_inpatient" required min="0" placeholder="e.g. 1">
+                            </div>
+
+                            <!-- Emergency Visits -->
+                            <div class="form-group">
+                                <label for="add_number_emergency">
+                                    Prior Emergency Visits <span style="color:#ef4444">*</span>
+                                    <span class="label-hint">&ge;2 visits = +2 pts</span>
+                                </label>
+                                <input type="number" id="add_number_emergency" required min="0" placeholder="e.g. 0">
+                            </div>
+
+                            <!-- Medications -->
+                            <div class="form-group">
+                                <label for="add_num_medications">
+                                    Number of Medications <span style="color:#ef4444">*</span>
+                                    <span class="label-hint">&ge;20 meds = +1 pt</span>
+                                </label>
+                                <input type="number" id="add_num_medications" required min="0" placeholder="e.g. 15">
+                            </div>
+
+                            <!-- Outpatient Visits -->
+                            <div class="form-group">
+                                <label for="add_number_outpatient">
+                                    Prior Outpatient Visits
+                                    <span class="label-hint">&ge;3 visits = +1 pt</span>
+                                </label>
+                                <input type="number" id="add_number_outpatient" min="0" value="0" placeholder="e.g. 0">
+                            </div>
+
+                            <!-- Lab Procedures -->
+                            <div class="form-group">
+                                <label for="add_num_lab_procedures">
+                                    Lab Procedures
+                                    <span class="label-hint">Optional</span>
+                                </label>
+                                <input type="number" id="add_num_lab_procedures" min="0" value="0" placeholder="e.g. 35">
+                            </div>
+
+                            <!-- Readmitted (Historical) -->
+                            <div class="form-group">
+                                <label for="add_readmitted">
+                                    Historical Readmitted
+                                    <span class="label-hint">Baseline record</span>
+                                </label>
+                                <select id="add_readmitted">
+                                    <option value="NO" selected>NO (No readmission)</option>
+                                    <option value="<30">&lt;30 (Within 30 days)</option>
+                                    <option value=">30">&gt;30 (After 30 days)</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="resetAddForm()">Reset Form</button>
+                            <button type="submit" class="btn btn-primary" id="addSubmitBtn">Add Patient Encounter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- TAB 2: PATIENT SEARCH & REVIEW QUEUE                              -->
+        <!-- ================================================================= -->
+        <section id="panelSearch" class="tab-panel">
+            
+            <!-- Filters Card -->
+            <div class="content-card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Search Patients &amp; Encounters</h2>
+                        <p class="card-subtitle">Filter clinical encounters by patient number, calculated risk score, or risk level</p>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="resetSearchForm()">Reset Filters</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="searchPatients()">Search</button>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <form onsubmit="event.preventDefault(); searchPatients();">
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label for="search_patient_nbr">Patient Number</label>
+                                <input type="number" id="search_patient_nbr" placeholder="e.g. 115196778" min="1">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="search_risk_level">Risk Level</label>
+                                <select id="search_risk_level" onchange="searchPatients()">
+                                    <option value="" selected>All Risk Levels</option>
+                                    <option value="HIGH">High Risk (5+ pts)</option>
+                                    <option value="MEDIUM">Medium Risk (3-4 pts)</option>
+                                    <option value="LOW">Low Risk (0-2 pts)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="search_risk_score">Exact Risk Score (0 - 8)</label>
+                                <input type="number" id="search_risk_score" placeholder="e.g. 5" min="0" max="8">
+                            </div>
+                        </div>
+
+                        <!-- Quick filter chips -->
+                        <div class="chips-container">
+                            <span style="font-size:12px; font-weight:600; color:var(--text-muted); align-self:center;">Quick Filters:</span>
+                            <button type="button" class="chip-btn active" id="chip_ALL" onclick="setQuickFilter('ALL')">All Encounters</button>
+                            <button type="button" class="chip-btn" id="chip_HIGH" onclick="setQuickFilter('HIGH')">High Risk Priority</button>
+                            <button type="button" class="chip-btn" id="chip_MEDIUM" onclick="setQuickFilter('MEDIUM')">Medium Risk</button>
+                            <button type="button" class="chip-btn" id="chip_LOW" onclick="setQuickFilter('LOW')">Low Risk</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Card -->
+            <div class="content-card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Encounter Results</h2>
+                        <p class="card-subtitle" id="searchResultSummary">Displaying encounters sorted by risk severity</p>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="searchPatients()">🔄 Refresh</button>
+                </div>
+
+                <div class="card-body" style="padding:0;">
+                    
+                    <div id="searchLoadingState" class="state-loading" style="display:none;">
+                        <div class="spinner"></div>
+                        <p>Querying patient database...</p>
+                    </div>
+
+                    <div id="searchEmptyState" class="state-empty" style="display:none;">
+                        <span class="state-icon">📋</span>
+                        <h3 style="font-size:16px; font-weight:700; color:#1e293b; margin-bottom:4px;">No Encounters Found</h3>
+                        <p>No patient encounters matched the specified filter criteria.</p>
+                    </div>
+
+                    <div class="table-wrapper" id="searchTableWrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Encounter ID</th>
+                                    <th>Patient #</th>
+                                    <th>Age</th>
+                                    <th>Hospital Stay</th>
+                                    <th>Prior (In/ER/Out)</th>
+                                    <th>Meds</th>
+                                    <th>Risk Score</th>
+                                    <th>Risk Level</th>
+                                    <th>Readmitted</th>
+                                    <th>Intervention Status</th>
+                                    <th style="text-align:center; width:100px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="searchTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- TAB 3: CARE INTERVENTION & TRACKING                               -->
+        <!-- ================================================================= -->
+        <section id="panelIntervention" class="tab-panel">
+            
+            <!-- Lookup Box -->
+            <div class="content-card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Care Intervention Management</h2>
+                        <p class="card-subtitle">Manage follow-ups, outreach assignments, and clinical notes for high-risk patients</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div style="display:flex; gap:12px; align-items:flex-end; max-width:540px; flex-wrap:wrap;">
+                        <div class="form-group" style="flex:1; min-width:240px;">
+                            <label for="int_encounter_id">
+                                Encounter ID <span style="color:#ef4444">*</span>
+                                <span class="label-hint">Enter encounter to fetch</span>
+                            </label>
+                            <input type="number" id="int_encounter_id" placeholder="e.g. 33695262" min="1">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="fetchInterventionData()">Fetch Encounter Status</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient / Encounter Summary Banner -->
+            <div id="interventionSummaryBox" class="detail-summary-box" style="display:none;">
+                <div class="summary-metric">
+                    <span class="summary-metric-label">Encounter ID</span>
+                    <span class="summary-metric-val" id="intSummaryEncounterId">—</span>
+                </div>
+                <div class="summary-metric">
+                    <span class="summary-metric-label">Patient Number</span>
+                    <span class="summary-metric-val" id="intSummaryPatientNbr">—</span>
+                </div>
+                <div class="summary-metric">
+                    <span class="summary-metric-label">Risk Score</span>
+                    <span class="summary-metric-val" id="intSummaryRiskScore">—</span>
+                </div>
+                <div class="summary-metric">
+                    <span class="summary-metric-label">Risk Level</span>
+                    <span id="intSummaryRiskBadge">—</span>
+                </div>
+                <div class="summary-metric">
+                    <span class="summary-metric-label">Intervention Status</span>
+                    <span id="intSummaryStatusBadge">—</span>
+                </div>
+            </div>
+
+            <!-- Update Form Card -->
+            <div class="content-card" id="interventionFormCard" style="display:none;">
+                <div class="card-header">
+                    <h2 class="card-title">Update Care Plan &amp; Outreach</h2>
+                </div>
+                <div class="card-body">
+                    <form onsubmit="updateIntervention(event)" novalidate>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="int_status">
+                                    Intervention Status <span style="color:#ef4444">*</span>
+                                </label>
+                                <select id="int_status" required>
+                                    <option value="PENDING_REVIEW">⏳ Pending Review</option>
+                                    <option value="ASSIGNED">👤 Assigned to Care Manager</option>
+                                    <option value="CONTACTED">📞 Patient Contacted</option>
+                                    <option value="FOLLOW_UP_SCHEDULED">📅 Follow-Up Scheduled</option>
+                                    <option value="CLOSED">✅ Closed / Resolved</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="int_assigned_to">
+                                    Assigned Clinician / Care Manager
+                                    <span class="label-hint">e.g. Dr. Sarah Smith</span>
+                                </label>
+                                <input type="text" id="int_assigned_to" placeholder="Care coordinator name" maxlength="100">
+                            </div>
+
+                            <div class="form-group col-span-full">
+                                <label for="int_notes">
+                                    Care Notes &amp; Follow-Up Details
+                                    <span class="label-hint">Clinical reasoning or action plan</span>
+                                </label>
+                                <textarea id="int_notes" placeholder="Enter notes regarding patient consultation, medication reconciliation, discharge plan review..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="updateIntBtn">Save Intervention Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- History Audit Trail Card -->
+            <div class="content-card" id="interventionHistoryCard" style="display:none;">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Intervention Audit Trail &amp; History</h2>
+                        <p class="card-subtitle">Chronological record of status changes and care updates</p>
+                    </div>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Changed At</th>
+                                    <th>Status</th>
+                                    <th>Assigned To</th>
+                                    <th>Clinical Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="interventionHistoryTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>Diabetes Readmission Intervention Queue &copy; 2026 &bull; Single File Client &bull; Educational Prototype</p>
+    </footer>
+
+    <!-- ================================================================= -->
+    <!-- JAVASCRIPT CONTROLLER (ALL FUNCTIONS CALLED FROM HTML)            -->
+    <!-- ================================================================= -->
+    <script>
+        // Use the backend's origin when served by FastAPI; otherwise use its local default port.
+        const API_BASE = ['8000', '8001'].includes(window.location.port)
+            ? window.location.origin
+            : 'http://127.0.0.1:8001';
+        document.getElementById('apiDocsLink').href = `${API_BASE}/docs`;
+
+        let currentActiveTab = 'add';
+        let alertTimeout = null;
+
+        // -----------------------------------------------------------------
+        // 1. Navigation & Tab Switching
+        // -----------------------------------------------------------------
+        function switchTab(tabName) {
+            currentActiveTab = tabName;
+
+            // Update Tab buttons
+            document.getElementById('tabBtnAdd').classList.toggle('active', tabName === 'add');
+            document.getElementById('tabBtnSearch').classList.toggle('active', tabName === 'search');
+            document.getElementById('tabBtnIntervention').classList.toggle('active', tabName === 'intervention');
+
+            // Update Panels
+            document.getElementById('panelAdd').classList.toggle('active', tabName === 'add');
+            document.getElementById('panelSearch').classList.toggle('active', tabName === 'search');
+            document.getElementById('panelIntervention').classList.toggle('active', tabName === 'intervention');
+
+            // If switching to Search, load encounters if not loaded
+            if (tabName === 'search') {
+                const tbody = document.getElementById('searchTableBody');
+                if (tbody.children.length === 0) {
+                    searchPatients();
+                }
+            }
+        }
+
+        // -----------------------------------------------------------------
+        // 2. Alert Feedback
+        // -----------------------------------------------------------------
+        function showAlert(message, type = 'info', autoDismiss = true) {
+            const alertBox = document.getElementById('globalAlert');
+            alertBox.className = `alert-banner ${type} show`;
+            alertBox.innerHTML = message;
+            
+            if (alertTimeout) clearTimeout(alertTimeout);
+            if (autoDismiss) {
+                alertTimeout = setTimeout(() => {
+                    alertBox.className = 'alert-banner';
+                }, 8000);
+            }
+        }
+
+        function hideAlert() {
+            const alertBox = document.getElementById('globalAlert');
+            alertBox.className = 'alert-banner';
+        }
+
+        // -----------------------------------------------------------------
+        // 3. Health Check
+        // -----------------------------------------------------------------
+        async function checkHealth() {
+            const dot = document.getElementById('healthDot');
+            const text = document.getElementById('healthText');
+            
+            text.textContent = 'Checking API...';
+            dot.className = 'status-dot';
+
+            try {
+                const response = await fetch(`${API_BASE}/health`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (response.ok) {
+                    dot.className = 'status-dot online';
+                    text.textContent = `API Connected (Port ${new URL(API_BASE).port || (window.location.protocol === 'https:' ? '443' : '80')})`;
+                } else {
+                    dot.className = 'status-dot offline';
+                    text.textContent = `API Error (${response.status})`;
+                }
+            } catch (err) {
+                dot.className = 'status-dot offline';
+                text.textContent = 'API Offline (Start uvicorn)';
+                console.warn('Backend unavailable:', err);
+            }
+        }
+
+        // -----------------------------------------------------------------
+        // 4. Tab 1: Add Patient Encounter
+        // -----------------------------------------------------------------
+        async function addPatient(event) {
+            if (event) event.preventDefault();
+            const btn = document.getElementById('addSubmitBtn');
+
+            const patientNbr = parseInt(document.getElementById('add_patient_nbr').value.trim(), 10);
+            const age = document.getElementById('add_age').value;
+            const timeInHospital = parseInt(document.getElementById('add_time_in_hospital').value, 10);
+            const numInpatient = parseInt(document.getElementById('add_number_inpatient').value, 10);
+            const numEmergency = parseInt(document.getElementById('add_number_emergency').value, 10);
+            const numMedications = parseInt(document.getElementById('add_num_medications').value, 10);
+            const numOutpatient = parseInt(document.getElementById('add_number_outpatient').value || '0', 10);
+            const numLab = parseInt(document.getElementById('add_num_lab_procedures').value || '0', 10);
+            const readmitted = document.getElementById('add_readmitted').value;
+
+            // Validations
+            if (isNaN(patientNbr) || patientNbr <= 0) {
+                showAlert('Please enter a valid positive Patient Number.', 'error');
+                return;
+            }
+            if (!age) {
+                showAlert('Please select an Age Group.', 'error');
+                return;
+            }
+            if (isNaN(timeInHospital) || timeInHospital < 0 || isNaN(numInpatient) || numInpatient < 0 || isNaN(numEmergency) || numEmergency < 0 || isNaN(numMedications) || numMedications < 0) {
+                showAlert('Please fill in all required encounter fields with non-negative numbers.', 'error');
+                return;
+            }
+
+            const payload = {
+                patient_nbr: patientNbr,
+                age: age,
+                time_in_hospital: timeInHospital,
+                number_inpatient: numInpatient,
+                number_emergency: numEmergency,
+                number_outpatient: numOutpatient,
+                num_medications: numMedications,
+                num_lab_procedures: numLab,
+                readmitted: readmitted
+            };
+
+            try {
+                btn.disabled = true;
+                btn.textContent = 'Adding Encounter...';
+
+                const response = await fetch(`${API_BASE}/encounters`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    let errMsg = response.statusText;
+                    try {
+                        const errObj = await response.json();
+                        if (errObj.detail) errMsg = typeof errObj.detail === 'string' ? errObj.detail : JSON.stringify(errObj.detail);
+                    } catch (_) {}
+                    throw new Error(errMsg);
+                }
+
+                const created = await response.json();
+                
+                let queuedText = '';
+                if (created.risk_level !== 'LOW') {
+                    queuedText = ` &bull; <strong>Queued for intervention</strong> (Intervention #${created.intervention_id || 'new'})
+                        <button class="btn btn-sm btn-primary" style="margin-left:8px;" onclick="selectEncounterForIntervention(${created.encounter_id}, ${created.patient_nbr})">Open Intervention &rarr;</button>`;
+                } else {
+                    queuedText = ` &bull; LOW risk (monitoring only, not queued)`;
+                }
+
+                showAlert(`&check; <strong>Encounter #${created.encounter_id}</strong> for Patient <strong>#${created.patient_nbr}</strong> added successfully!<br>
+                    Risk Level: <strong>${created.risk_level}</strong> (${created.risk_score} / 8 points)${queuedText}
+                    <button class="btn btn-sm btn-secondary" style="margin-left:8px;" onclick="searchForPatientNumber(${created.patient_nbr})">View in Search &rarr;</button>`, 'success', false);
+
+                // Reset form
+                resetAddForm();
+
+            } catch (err) {
+                console.error('Failed to add encounter:', err);
+                showAlert(`Failed to add encounter: ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Add Patient Encounter';
+            }
+        }
+
+        function resetAddForm() {
+            document.getElementById('addEncounterForm').reset();
+            document.getElementById('add_number_outpatient').value = '0';
+            document.getElementById('add_num_lab_procedures').value = '0';
+            document.getElementById('add_readmitted').value = 'NO';
+        }
+
+        // -----------------------------------------------------------------
+        // 5. Tab 2: Patient Search & Queue
+        // -----------------------------------------------------------------
+        async function searchPatients() {
+            const patientNbr = document.getElementById('search_patient_nbr').value.trim();
+            const riskLevel = document.getElementById('search_risk_level').value;
+            const riskScore = document.getElementById('search_risk_score').value.trim();
+
+            const loading = document.getElementById('searchLoadingState');
+            const empty = document.getElementById('searchEmptyState');
+            const wrapper = document.getElementById('searchTableWrapper');
+            const tbody = document.getElementById('searchTableBody');
+            const summary = document.getElementById('searchResultSummary');
+            const countBadge = document.getElementById('searchCountBadge');
+
+            loading.style.display = 'block';
+            empty.style.display = 'none';
+            wrapper.style.display = 'none';
+            tbody.innerHTML = '';
+
+            try {
+                const url = new URL(`${API_BASE}/patients/search`);
+                url.searchParams.append('limit', '50');
+
+                if (patientNbr) url.searchParams.append('patient_nbr', patientNbr);
+                if (riskLevel && riskLevel !== 'ALL') url.searchParams.append('risk_level', riskLevel);
+                if (riskScore !== '') url.searchParams.append('risk_score', riskScore);
+
+                const response = await fetch(url.toString(), {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    let errMsg = response.statusText;
+                    try {
+                        const errObj = await response.json();
+                        if (errObj.detail) errMsg = typeof errObj.detail === 'string' ? errObj.detail : JSON.stringify(errObj.detail);
+                    } catch (_) {}
+                    throw new Error(errMsg);
+                }
+
+                const data = await response.json();
+                countBadge.textContent = data.length;
+
+                if (data.length === 0) {
+                    loading.style.display = 'none';
+                    empty.style.display = 'block';
+                    summary.textContent = 'No matching encounters found.';
+                    return;
+                }
+
+                summary.textContent = `Showing ${data.length} encounter(s) (HIGH risk prioritized)`;
+
+                // Render rows
+                data.forEach(item => {
+                    const tr = document.createElement('tr');
+
+                    const statusVal = item.status || item.intervention_status || (item.risk_level === 'LOW' ? 'NONE' : 'PENDING_REVIEW');
+                    const statusClass = item.risk_level === 'LOW' ? 'badge-status-NONE' : `badge-status-${statusVal}`;
+                    const statusLabel = item.risk_level === 'LOW' ? '— Not Queued' : statusVal.replace(/_/g, ' ');
+
+                    tr.innerHTML = `
+                        <td>
+                            <a href="javascript:void(0)" 
+                               class="encounter-link" 
+                               onclick="selectEncounterForIntervention(${item.encounter_id}, ${item.patient_nbr})" 
+                               title="Click Encounter #${item.encounter_id} to navigate, update status, and add notes">
+                                <span>#${item.encounter_id}</span>
+                                <span class="edit-icon">✏️</span>
+                            </a>
+                        </td>
+                        <td><strong>#${item.patient_nbr}</strong></td>
+                        <td>${item.age || '—'}</td>
+                        <td>${item.time_in_hospital != null ? item.time_in_hospital + ' days' : '—'}</td>
+                        <td>${item.number_inpatient ?? 0} / ${item.number_emergency ?? 0} / ${item.number_outpatient ?? 0}</td>
+                        <td>${item.num_medications ?? '—'}</td>
+                        <td><strong>${item.risk_score}</strong> / 8</td>
+                        <td><span class="badge badge-risk-${item.risk_level}">${item.risk_level}</span></td>
+                        <td>${item.readmitted || '—'}</td>
+                        <td><span class="badge-status ${statusClass}">${statusLabel}</span></td>
+                        <td class="table-action-cell">
+                            <button class="table-action-btn" onclick="selectEncounterForIntervention(${item.encounter_id}, ${item.patient_nbr})" title="Update status and notes for Encounter #${item.encounter_id}">
+                                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                <span>Edit</span>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                loading.style.display = 'none';
+                wrapper.style.display = 'block';
+
+            } catch (err) {
+                loading.style.display = 'none';
+                console.error('Search error:', err);
+                showAlert(`Error searching patients: ${err.message}`, 'error');
+            }
+        }
+
+        function setQuickFilter(level) {
+            document.querySelectorAll('.chip-btn').forEach(btn => btn.classList.remove('active'));
+            const chip = document.getElementById(`chip_${level}`);
+            if (chip) chip.classList.add('active');
+
+            const select = document.getElementById('search_risk_level');
+            select.value = level === 'ALL' ? '' : level;
+            searchPatients();
+        }
+
+        function resetSearchForm() {
+            document.getElementById('search_patient_nbr').value = '';
+            document.getElementById('search_risk_level').value = '';
+            document.getElementById('search_risk_score').value = '';
+            document.querySelectorAll('.chip-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('chip_ALL').classList.add('active');
+            searchPatients();
+        }
+
+        function searchForPatientNumber(patientNbr) {
+            switchTab('search');
+            document.getElementById('search_patient_nbr').value = patientNbr;
+            document.getElementById('search_risk_level').value = '';
+            document.getElementById('search_risk_score').value = '';
+            searchPatients();
+        }
+
+        // -----------------------------------------------------------------
+        // 6. Tab 3: Care Intervention Management
+        // -----------------------------------------------------------------
+        function selectEncounterForIntervention(encounterId, patientNbr) {
+            switchTab('intervention');
+            document.getElementById('int_encounter_id').value = encounterId;
+            fetchInterventionData(true);
+        }
+
+        async function fetchInterventionData(autoFocusAndScroll = false) {
+            const encounterIdInput = document.getElementById('int_encounter_id');
+            const encounterId = parseInt(encounterIdInput.value.trim(), 10);
+
+            if (isNaN(encounterId) || encounterId <= 0) {
+                showAlert('Please enter a valid Encounter ID.', 'error');
+                return;
+            }
+
+            hideAlert();
+
+            try {
+                // Fetch encounter first
+                const encResp = await fetch(`${API_BASE}/encounters/${encounterId}`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!encResp.ok) {
+                    if (encResp.status === 404) throw new Error(`Encounter #${encounterId} not found in database.`);
+                    throw new Error(`Failed to fetch encounter: ${encResp.statusText}`);
+                }
+
+                const encounter = await encResp.json();
+
+                // Populate Summary Box
+                document.getElementById('intSummaryEncounterId').textContent = `#${encounter.encounter_id}`;
+                document.getElementById('intSummaryPatientNbr').textContent = `#${encounter.patient_nbr}`;
+                document.getElementById('intSummaryRiskScore').textContent = `${encounter.risk_score} / 8 points`;
+                document.getElementById('intSummaryRiskBadge').innerHTML = `<span class="badge badge-risk-${encounter.risk_level}">${encounter.risk_level}</span>`;
+                
+                const currentStatus = encounter.status || encounter.intervention_status || (encounter.risk_level === 'LOW' ? 'PENDING_REVIEW' : 'PENDING_REVIEW');
+                document.getElementById('intSummaryStatusBadge').innerHTML = `<span class="badge-status badge-status-${currentStatus}">${currentStatus.replace(/_/g, ' ')}</span>`;
+                document.getElementById('interventionSummaryBox').style.display = 'flex';
+
+                // Display the Update Form for editing status and adding notes
+                const formCard = document.getElementById('interventionFormCard');
+                formCard.style.display = 'block';
+
+                // Pre-fill form fields
+                document.getElementById('int_status').value = currentStatus;
+                document.getElementById('int_assigned_to').value = encounter.assigned_to || '';
+                document.getElementById('int_notes').value = encounter.intervention_notes || encounter.notes || '';
+
+                // Fetch history audit trail
+                loadInterventionHistory(encounterId);
+
+                // Auto-scroll and focus if triggered by selecting an encounter
+                if (autoFocusAndScroll) {
+                    formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setTimeout(() => {
+                        const notesInput = document.getElementById('int_notes');
+                        if (notesInput) notesInput.focus();
+                    }, 250);
+                    showAlert(`📋 <strong>Encounter #${encounter.encounter_id}</strong> (Patient #${encounter.patient_nbr}) loaded. You can now update the status and add clinical notes below.`, 'info');
+                }
+
+            } catch (err) {
+                console.error('Fetch intervention error:', err);
+                document.getElementById('interventionSummaryBox').style.display = 'none';
+                document.getElementById('interventionFormCard').style.display = 'none';
+                document.getElementById('interventionHistoryCard').style.display = 'none';
+                showAlert(err.message, 'error');
+            }
+        }
+
+        async function updateIntervention(event) {
+            if (event) event.preventDefault();
+            const encounterId = parseInt(document.getElementById('int_encounter_id').value.trim(), 10);
+            const status = document.getElementById('int_status').value;
+            const assignedTo = document.getElementById('int_assigned_to').value.trim() || null;
+            const notes = document.getElementById('int_notes').value.trim() || null;
+            const btn = document.getElementById('updateIntBtn');
+
+            if (isNaN(encounterId)) {
+                showAlert('No encounter selected.', 'error');
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                btn.textContent = 'Saving...';
+
+                const response = await fetch(`${API_BASE}/interventions/${encounterId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: status,
+                        assigned_to: assignedTo,
+                        notes: notes
+                    })
+                });
+
+                if (!response.ok) {
+                    let errMsg = response.statusText;
+                    try {
+                        const errObj = await response.json();
+                        if (errObj.detail) errMsg = typeof errObj.detail === 'string' ? errObj.detail : JSON.stringify(errObj.detail);
+                    } catch (_) {}
+                    throw new Error(errMsg);
+                }
+
+                const updated = await response.json();
+
+                // Update summary badge
+                document.getElementById('intSummaryStatusBadge').innerHTML = 
+                    `<span class="badge-status badge-status-${updated.status}">${updated.status.replace(/_/g, ' ')}</span>`;
+
+                showAlert(`&check; Intervention for Encounter <strong>#${encounterId}</strong> updated to <strong>${updated.status}</strong> successfully.`, 'success');
+
+                // Refresh history
+                loadInterventionHistory(encounterId);
+
+            } catch (err) {
+                console.error('Update intervention error:', err);
+                showAlert(`Failed to update intervention: ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Intervention Update';
+            }
+        }
+
+        async function loadInterventionHistory(encounterId) {
+            const histCard = document.getElementById('interventionHistoryCard');
+            const tbody = document.getElementById('interventionHistoryTableBody');
+            tbody.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_BASE}/interventions/${encounterId}/history`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    histCard.style.display = 'none';
+                    return;
+                }
+
+                const history = await response.json();
+                if (history.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">No previous status updates recorded yet.</td></tr>`;
+                    histCard.style.display = 'block';
+                    return;
+                }
+
+                history.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const dateStr = item.changed_at ? new Date(item.changed_at).toLocaleString() : '—';
+                    tr.innerHTML = `
+                        <td style="white-space:nowrap;"><strong>${dateStr}</strong></td>
+                        <td><span class="badge-status badge-status-${item.status}">${item.status.replace(/_/g, ' ')}</span></td>
+                        <td>${item.assigned_to || '<em>Unassigned</em>'}</td>
+                        <td>${item.notes || '<em style="color:#94a3b8;">No notes</em>'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                histCard.style.display = 'block';
+
+            } catch (err) {
+                console.warn('Could not load history:', err);
+                histCard.style.display = 'none';
+            }
+        }
+
+        // -----------------------------------------------------------------
+        // Initial setup on load
+        // -----------------------------------------------------------------
+        window.onload = function() {
+            checkHealth();
+            // Preload search count badge in background
+            fetch(`${API_BASE}/patients/search?limit=1`)
+                .then(r => r.json())
+                .then(d => {
+                    document.getElementById('searchCountBadge').textContent = '50+';
+                })
+                .catch(() => {});
+        };
+    </script>
+</body>
+</html>

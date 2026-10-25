@@ -1,0 +1,10 @@
+[    1638ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=b9b39e74:15801
+[  532551ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:5173/@vite/client:1089
+[  602492ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=41d90570:15801
+[ 3073047ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5173/src/App.tsx?t=1792822337860:0
+[ 3073047ms] [ERROR] [vite] Failed to reload /src/App.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:1022
+[ 4071609ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:5173/@vite/client:1089
+[ 6565882ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:5173/src/index.css:0
+[ 6565913ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:5173/src/App.tsx?t=1792822337860:0
+[ 6566033ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:5173/node_modules/vite/dist/client/env.mjs:0
+[ 6566069ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:5173/favicon.svg:0

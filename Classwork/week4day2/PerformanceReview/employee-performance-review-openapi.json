@@ -1,0 +1,833 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Employee Performance Review Management System API",
+    "version": "1.0.0",
+    "description": "Proposed training API contract based on the Testleaf Employee Performance Review requirements/design snapshot. This document describes endpoints to implement; it is not evidence that a live backend already exists. Core classroom workflow: list employees and review periods, submit a review, and list saved reviews. Review detail is an optional extension. Annual and half-yearly cycles are configured as records in review_periods. Ratings must be 1 through 5; comments are mandatory; server calculates average_rating = ROUND((quality_rating + delivery_rating + teamwork_rating) / 3, 2). Each employee can have at most one review per period; only Open review periods accept new submissions. The displayed Completed status is derived for saved reviews; no workflow status column is required by the pictured database design."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/api",
+      "description": "Local classroom FastAPI server (proposed)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Mandatory - Reference Data",
+      "description": "Needed to populate employee and review-period selections in the form."
+    },
+    {
+      "name": "Mandatory - Reviews",
+      "description": "The two main GET/POST review APIs required for the 2.5-hour exercise."
+    },
+    {
+      "name": "Optional - Review Details",
+      "description": "Read-only extension if learners finish the mandatory scope."
+    }
+  ],
+  "paths": {
+    "/employees": {
+      "get": {
+        "tags": [
+          "Mandatory - Reference Data"
+        ],
+        "summary": "List employees for the review form",
+        "description": "Return employee master records. Optional status filter can return only Active employees for form selection.",
+        "operationId": "listEmployees",
+        "x-classroom-scope": "mandatory",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Optionally filter by employee status; omit to return all employees.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Active",
+                "Inactive"
+              ]
+            },
+            "example": "Active"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Employee list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Employee"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "employee_id": "EMP101",
+                    "name": "John Smith",
+                    "department": "Engineering",
+                    "email": "john.smith@example.com",
+                    "status": "Active"
+                  },
+                  {
+                    "id": 2,
+                    "employee_id": "EMP102",
+                    "name": "Sarah Johnson",
+                    "department": "Operations",
+                    "email": "sarah.johnson@example.com",
+                    "status": "Active"
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "code": "SERVER_ERROR",
+                  "message": "Unable to retrieve employees."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/review-periods": {
+      "get": {
+        "tags": [
+          "Mandatory - Reference Data"
+        ],
+        "summary": "List annual or half-yearly review periods",
+        "description": "Return configured review periods. The form should submit only to a period with status Open.",
+        "operationId": "listReviewPeriods",
+        "x-classroom-scope": "mandatory",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Optional filter, e.g. status=Open for submission form.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Open",
+                "Closed"
+              ]
+            },
+            "example": "Open"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review period list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewPeriod"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "name": "H2 2026 (Jul–Dec)",
+                    "start_date": "2026-07-01",
+                    "end_date": "2026-12-31",
+                    "status": "Open"
+                  },
+                  {
+                    "id": 2,
+                    "name": "H1 2026 (Jan–Jun)",
+                    "start_date": "2026-01-01",
+                    "end_date": "2026-06-30",
+                    "status": "Closed"
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "code": "SERVER_ERROR",
+                  "message": "Unable to retrieve review periods."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reviews": {
+      "get": {
+        "tags": [
+          "Mandatory - Reviews"
+        ],
+        "summary": "List submitted performance reviews",
+        "description": "Return reviews for the HR review register; optionally filter by the numeric employee primary key and review period primary key. An empty result is [].",
+        "operationId": "listReviews",
+        "x-classroom-scope": "mandatory",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "query",
+            "required": false,
+            "description": "employees.id (numeric DB key), not the EMP101-style code",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "period_id",
+            "in": "query",
+            "required": false,
+            "description": "review_periods.id (numeric DB key)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review register rows",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Review"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 101,
+                    "employee_id": 1,
+                    "employee_code": "EMP101",
+                    "employee_name": "John Smith",
+                    "period_id": 1,
+                    "period_name": "H2 2026 (Jul–Dec)",
+                    "quality_rating": 4,
+                    "delivery_rating": 5,
+                    "teamwork_rating": 4,
+                    "average_rating": 4.33,
+                    "comments": "Strong ownership and collaboration throughout the review period.",
+                    "status": "Completed",
+                    "created_at": "2026-10-25T09:30:00Z"
+                  },
+                  {
+                    "id": 102,
+                    "employee_id": 2,
+                    "employee_code": "EMP102",
+                    "employee_name": "Sarah Johnson",
+                    "period_id": 2,
+                    "period_name": "H1 2026 (Jan–Jun)",
+                    "quality_rating": 3,
+                    "delivery_rating": 4,
+                    "teamwork_rating": 4,
+                    "average_rating": 3.67,
+                    "comments": "Delivered planned work and consistently supported colleagues.",
+                    "status": "Completed",
+                    "created_at": "2026-07-05T11:00:00Z"
+                  }
+                ]
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid filter parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                },
+                "example": {
+                  "detail": [
+                    {
+                      "loc": [
+                        "query",
+                        "employee_id"
+                      ],
+                      "msg": "Input should be a valid integer",
+                      "type": "int_parsing"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Mandatory - Reviews"
+        ],
+        "summary": "Submit a performance review",
+        "description": "Save the manager’s ratings and comments for one employee in one configured review period. Server validates all ratings 1–5 and nonblank comments, looks up employee and period, rejects Closed periods, enforces uniqueness for (employee_id, period_id), computes average_rating to 2 decimals, and stores created_at. Neither the average nor employee_name nor review status should be trusted from client input.",
+        "operationId": "createReview",
+        "x-classroom-scope": "mandatory",
+        "requestBody": {
+          "required": true,
+          "description": "Ratings and manager comments. IDs refer to numeric employee/period primary keys.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewCreate"
+              },
+              "example": {
+                "employee_id": 1,
+                "period_id": 1,
+                "quality_rating": 4,
+                "delivery_rating": 5,
+                "teamwork_rating": 4,
+                "comments": "Strong ownership and collaboration throughout the review period."
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Performance review created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                },
+                "example": {
+                  "id": 101,
+                  "employee_id": 1,
+                  "employee_code": "EMP101",
+                  "employee_name": "John Smith",
+                  "period_id": 1,
+                  "period_name": "H2 2026 (Jul–Dec)",
+                  "quality_rating": 4,
+                  "delivery_rating": 5,
+                  "teamwork_rating": 4,
+                  "average_rating": 4.33,
+                  "comments": "Strong ownership and collaboration throughout the review period.",
+                  "status": "Completed",
+                  "created_at": "2026-10-25T09:30:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Review period is Closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "code": "REVIEW_PERIOD_CLOSED",
+                  "message": "Only Open review periods accept new reviews."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Employee or review period ID does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "code": "EMPLOYEE_NOT_FOUND",
+                  "message": "Employee with id 999 was not found."
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicate review for employee and period",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "code": "DUPLICATE_REVIEW",
+                  "message": "A review already exists for this employee and period."
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                },
+                "example": {
+                  "detail": [
+                    {
+                      "loc": [
+                        "body",
+                        "quality_rating"
+                      ],
+                      "msg": "Input should be less than or equal to 5",
+                      "type": "less_than_equal"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reviews/{id}": {
+      "get": {
+        "tags": [
+          "Optional - Review Details"
+        ],
+        "summary": "Get one submitted review by ID",
+        "description": "Optional classroom extension powering the read-only Review Details screen.",
+        "operationId": "getReviewById",
+        "x-classroom-scope": "optional",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Numeric primary key of performance_reviews.id",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "example": 101
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                },
+                "example": {
+                  "id": 101,
+                  "employee_id": 1,
+                  "employee_code": "EMP101",
+                  "employee_name": "John Smith",
+                  "period_id": 1,
+                  "period_name": "H2 2026 (Jul–Dec)",
+                  "quality_rating": 4,
+                  "delivery_rating": 5,
+                  "teamwork_rating": 4,
+                  "average_rating": 4.33,
+                  "comments": "Strong ownership and collaboration throughout the review period.",
+                  "status": "Completed",
+                  "created_at": "2026-10-25T09:30:00Z"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Review not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "code": "REVIEW_NOT_FOUND",
+                  "message": "No review exists with id 999."
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid review ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                },
+                "example": {
+                  "detail": [
+                    {
+                      "loc": [
+                        "path",
+                        "id"
+                      ],
+                      "msg": "Input should be a valid integer",
+                      "type": "int_parsing"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Employee": {
+        "type": "object",
+        "description": "Employee master record. id is the numeric database key; employee_id is the displayed employee code.",
+        "required": [
+          "id",
+          "employee_id",
+          "name",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 1,
+            "description": "Primary key: employees.id"
+          },
+          "employee_id": {
+            "type": "string",
+            "maxLength": 20,
+            "example": "EMP101",
+            "description": "Unique business code displayed in the UI"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "John Smith"
+          },
+          "department": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true,
+            "example": "Engineering"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 100,
+            "nullable": true,
+            "example": "john.smith@example.com"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Active",
+              "Inactive"
+            ],
+            "default": "Active",
+            "example": "Active"
+          }
+        },
+        "x-db-table": "employees"
+      },
+      "ReviewPeriod": {
+        "type": "object",
+        "description": "A review cycle; annual and half-yearly cycles are represented by period records.",
+        "required": [
+          "id",
+          "name",
+          "start_date",
+          "end_date",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 50,
+            "example": "H2 2026 (Jul–Dec)"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-07-01"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-12-31"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Open",
+              "Closed"
+            ],
+            "default": "Open",
+            "example": "Open"
+          }
+        },
+        "x-db-table": "review_periods"
+      },
+      "ReviewCreate": {
+        "type": "object",
+        "description": "Submitted values. Do not send average_rating or database id; the backend creates them.",
+        "required": [
+          "employee_id",
+          "period_id",
+          "quality_rating",
+          "delivery_rating",
+          "teamwork_rating",
+          "comments"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "employee_id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Foreign key to employees.id, NOT the employee code",
+            "example": 1
+          },
+          "period_id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Foreign key to review_periods.id",
+            "example": 1
+          },
+          "quality_rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 4
+          },
+          "delivery_rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5
+          },
+          "teamwork_rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 4
+          },
+          "comments": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Required, non-whitespace manager feedback",
+            "example": "Strong ownership and collaboration throughout the review period."
+          }
+        }
+      },
+      "Review": {
+        "type": "object",
+        "description": "Stored performance review enriched with employee/period labels for the register UI.",
+        "required": [
+          "id",
+          "employee_id",
+          "employee_code",
+          "employee_name",
+          "period_id",
+          "period_name",
+          "quality_rating",
+          "delivery_rating",
+          "teamwork_rating",
+          "average_rating",
+          "comments",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "readOnly": true,
+            "example": 101
+          },
+          "employee_id": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 1
+          },
+          "employee_code": {
+            "type": "string",
+            "example": "EMP101",
+            "readOnly": true
+          },
+          "employee_name": {
+            "type": "string",
+            "example": "John Smith",
+            "readOnly": true
+          },
+          "period_id": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 1
+          },
+          "period_name": {
+            "type": "string",
+            "example": "H2 2026 (Jul–Dec)",
+            "readOnly": true
+          },
+          "quality_rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 4
+          },
+          "delivery_rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5
+          },
+          "teamwork_rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 4
+          },
+          "average_rating": {
+            "type": "number",
+            "format": "double",
+            "minimum": 1,
+            "maximum": 5,
+            "multipleOf": 0.01,
+            "readOnly": true,
+            "example": 4.33,
+            "description": "Server-calculated arithmetic average rounded to 2 decimal places"
+          },
+          "comments": {
+            "type": "string",
+            "minLength": 1,
+            "example": "Strong ownership and collaboration throughout the review period."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Completed"
+            ],
+            "readOnly": true,
+            "example": "Completed",
+            "description": "Display-only label for submitted review; derived, not an extra DB status column"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "example": "2026-10-25T09:30:00Z"
+          }
+        },
+        "x-db-table": "performance_reviews"
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "DUPLICATE_REVIEW"
+          },
+          "message": {
+            "type": "string",
+            "example": "A review already exists for this employee and period."
+          }
+        }
+      },
+      "ValidationIssue": {
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "example": [
+              "body",
+              "quality_rating"
+            ]
+          },
+          "msg": {
+            "type": "string",
+            "example": "Input should be less than or equal to 5"
+          },
+          "type": {
+            "type": "string",
+            "example": "less_than_equal"
+          }
+        }
+      },
+      "HTTPValidationError": {
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationIssue"
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-database-design": {
+    "employees": {
+      "id": "SERIAL PRIMARY KEY",
+      "employee_id": "VARCHAR(20) UNIQUE NOT NULL",
+      "name": "VARCHAR(100) NOT NULL",
+      "department": "VARCHAR(100) NULL",
+      "email": "VARCHAR(100) NULL",
+      "status": "VARCHAR(20) DEFAULT 'Active'"
+    },
+    "review_periods": {
+      "id": "SERIAL PRIMARY KEY",
+      "name": "VARCHAR(50) NOT NULL",
+      "start_date": "DATE NOT NULL",
+      "end_date": "DATE NOT NULL",
+      "status": "VARCHAR(20) DEFAULT 'Open'"
+    },
+    "performance_reviews": {
+      "id": "SERIAL PRIMARY KEY",
+      "employee_id": "INTEGER NOT NULL REFERENCES employees(id)",
+      "period_id": "INTEGER NOT NULL REFERENCES review_periods(id)",
+      "quality_rating": "INTEGER NOT NULL CHECK (quality_rating BETWEEN 1 AND 5)",
+      "delivery_rating": "INTEGER NOT NULL CHECK (delivery_rating BETWEEN 1 AND 5)",
+      "teamwork_rating": "INTEGER NOT NULL CHECK (teamwork_rating BETWEEN 1 AND 5)",
+      "average_rating": "NUMERIC(3,2) NOT NULL",
+      "comments": "TEXT NOT NULL",
+      "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "uniqueness": "UNIQUE(employee_id, period_id)"
+    }
+  }
+}
