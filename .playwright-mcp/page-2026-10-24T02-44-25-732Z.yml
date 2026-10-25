@@ -1,0 +1,93 @@
+- generic [active] [ref=f2e1]:
+  - banner [ref=f2e2]:
+    - generic [ref=f2e3]:
+      - generic [ref=f2e8]:
+        - heading "Diabetes Patient Management" [level=1] [ref=f2e9]
+        - paragraph [ref=f2e10]: Clinical Care Intervention Queue & Readmission Risk Analysis
+      - generic [ref=f2e11]:
+        - generic "Click to test backend connection" [ref=f2e12] [cursor=pointer]: Checking API...
+        - link "Swagger API ↗" [ref=f2e15] [cursor=pointer]:
+          - /url: http://127.0.0.1:8001/docs
+  - navigation [ref=f2e16]:
+    - generic [ref=f2e17]:
+      - button "➕ Add Patient Encounter" [ref=f2e18] [cursor=pointer]
+      - button "🔍 Patient Search & Review Queue 0" [ref=f2e20] [cursor=pointer]:
+        - generic [ref=f2e21]: 🔍 Patient Search & Review Queue
+        - generic [ref=f2e22]: "0"
+      - button "📋 Care Intervention & Tracking" [ref=f2e23] [cursor=pointer]
+  - main [ref=f2e25]:
+    - generic [ref=f2e27]:
+      - generic [ref=f2e29]:
+        - heading "Add Patient Encounter" [level=2] [ref=f2e30]
+        - paragraph [ref=f2e31]: Register a new patient hospital stay to score readmission risk and queue interventions
+      - generic [ref=f2e33]:
+        - generic [ref=f2e34]:
+          - generic [ref=f2e35]:
+            - generic [ref=f2e36]:
+              - text: Patient Number
+              - generic [ref=f2e37]: "*"
+              - generic [ref=f2e38]: e.g. 115196778
+            - spinbutton "Patient Number * e.g. 115196778" [ref=f2e39]
+          - generic [ref=f2e40]:
+            - generic [ref=f2e41]:
+              - text: Age Group
+              - generic [ref=f2e42]: "*"
+            - combobox "Age Group *" [ref=f2e43] [cursor=pointer]:
+              - option "Select age group" [disabled] [selected]
+              - option "[0-10)"
+              - option "[10-20)"
+              - option "[20-30)"
+              - option "[30-40)"
+              - option "[40-50)"
+              - option "[50-60)"
+              - option "[60-70)"
+              - option "[70-80)"
+              - option "[80-90)"
+              - option "[90-100)"
+          - generic [ref=f2e44]:
+            - generic [ref=f2e45]:
+              - text: Time in Hospital (days)
+              - generic [ref=f2e46]: "*"
+              - generic [ref=f2e47]: ≥7 days = +1 pt
+            - spinbutton "Time in Hospital (days) * ≥7 days = +1 pt" [ref=f2e48]
+          - generic [ref=f2e49]:
+            - generic [ref=f2e50]:
+              - text: Prior Inpatient Visits
+              - generic [ref=f2e51]: "*"
+              - generic [ref=f2e52]: ≥3 visits = +3 pts
+            - spinbutton "Prior Inpatient Visits * ≥3 visits = +3 pts" [ref=f2e53]
+          - generic [ref=f2e54]:
+            - generic [ref=f2e55]:
+              - text: Prior Emergency Visits
+              - generic [ref=f2e56]: "*"
+              - generic [ref=f2e57]: ≥2 visits = +2 pts
+            - spinbutton "Prior Emergency Visits * ≥2 visits = +2 pts" [ref=f2e58]
+          - generic [ref=f2e59]:
+            - generic [ref=f2e60]:
+              - text: Number of Medications
+              - generic [ref=f2e61]: "*"
+              - generic [ref=f2e62]: ≥20 meds = +1 pt
+            - spinbutton "Number of Medications * ≥20 meds = +1 pt" [ref=f2e63]
+          - generic [ref=f2e64]:
+            - generic [ref=f2e65]:
+              - text: Prior Outpatient Visits
+              - generic [ref=f2e66]: ≥3 visits = +1 pt
+            - spinbutton "Prior Outpatient Visits ≥3 visits = +1 pt" [ref=f2e67]: "0"
+          - generic [ref=f2e68]:
+            - generic [ref=f2e69]:
+              - text: Lab Procedures
+              - generic [ref=f2e70]: Optional
+            - spinbutton "Lab Procedures Optional" [ref=f2e71]: "0"
+          - generic [ref=f2e72]:
+            - generic [ref=f2e73]:
+              - text: Historical Readmitted
+              - generic [ref=f2e74]: Baseline record
+            - combobox "Historical Readmitted Baseline record" [ref=f2e75] [cursor=pointer]:
+              - option "NO (No readmission)" [selected]
+              - option "<30 (Within 30 days)"
+              - option ">30 (After 30 days)"
+        - generic [ref=f2e76]:
+          - button "Reset Form" [ref=f2e77] [cursor=pointer]
+          - button "Add Patient Encounter" [ref=f2e78] [cursor=pointer]
+  - contentinfo [ref=f2e79]:
+    - paragraph [ref=f2e80]: Diabetes Readmission Intervention Queue © 2026 • Single File Client • Educational Prototype
