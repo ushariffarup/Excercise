@@ -182,3 +182,7 @@
     border-right-color: var(--border);
   }
 }
+
+bg-blue-500{
+  background-color: #3b82f6;
+}
